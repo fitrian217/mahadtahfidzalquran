@@ -14,6 +14,7 @@ assets/img*.{png,jpg}  logo dan latar sertifikat
 data/data.js        data rekap santri (window.RAPOR_DATA)
 data/quran.js       teks Al-Qur'an untuk kuis (window.QURAN_DATA)
 examples/ai-executive-summaries/   contoh Netlify Functions + Claude (terpisah dari aplikasi rapor)
+baca-bareng-hewan/  aplikasi belajar membaca untuk anak TK (halaman terpisah)
 netlify.toml        konfigurasi deploy statis
 ```
 
