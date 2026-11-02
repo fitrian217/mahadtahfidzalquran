@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Baca Bareng Hewan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;800&display=swap">
+<style>
+/* Layout: satu layar, header bintang di atas, konten besar di tengah, tombol menu besar di bawah. Gaya tunggal, cerah, tanpa mode gelap. */
+:root{
+  --ink:#2a2354; --ink-soft:#5b5486; --bg:#e6f6ff; --card:#ffffff;
+  --t1:#ffd9dd; --c1:#ff5d6c;
+  --t2:#ffe7c2; --c2:#ff9f1c;
+  --t3:#fff2b3; --c3:#f2b800;
+  --t4:#c9f5de; --c4:#2ec27e;
+  --t5:#c5f1f4; --c5:#18b9c4;
+  --t6:#d4e4ff; --c6:#3d8bff;
+  --t7:#e3d9ff; --c7:#8b5cf6;
+  --t8:#ffd6ec; --c8:#ff6fb5;
+  --font-display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+  --font-read:'Andika','Comic Sans MS','Trebuchet MS',system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--font-read);
+  font-size:18px; line-height:1.4; min-height:100vh;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:12px 112px;
+  background-image:
+    radial-gradient(circle at 8% 12%,#ffffff 0 38px,transparent 39px),
+    radial-gradient(circle at 92% 22%,#ffffff 0 56px,transparent 57px),
+    radial-gradient(circle at 80% 78%,#ffffff 0 44px,transparent 45px);
+  background-attachment:fixed;
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:4px solid var(--c6);outline-offset:3px}
+.wrap{max-width:760px;margin:0 auto}
+
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 12px}
+h1{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(26px,7vw,38px);line-height:1.05;text-wrap:balance}
+h1 span:nth-child(1){color:var(--c1)} h1 span:nth-child(2){color:var(--c6)} h1 span:nth-child(3){color:var(--c4)}
+.stars{flex:none;display:flex;align-items:center;gap:6px;background:var(--card);border:4px solid var(--c3);border-radius:999px;padding:4px 16px 4px 10px;font-family:var(--font-display);font-weight:800;font-size:26px}
+.stars b{font-size:28px;line-height:1}
+
+section{display:none}
+section.on{display:block}
+.hint{margin:0 0 12px;color:var(--ink-soft);font-size:16px}
+
+/* panel besar hewan */
+.stage{background:var(--t);border:5px solid var(--c);border-radius:36px;padding:18px 16px 20px;text-align:center;box-shadow:0 8px 0 var(--c)}
+.stage .emoji{font-size:clamp(96px,30vw,168px);line-height:1.1;display:inline-block;cursor:pointer;user-select:none}
+.stage .big{font-family:var(--font-read);font-weight:700;font-size:clamp(64px,20vw,110px);line-height:1;letter-spacing:.02em}
+.stage .word{font-family:var(--font-read);font-weight:700;font-size:clamp(40px,12vw,68px);line-height:1.1;margin-top:4px;word-break:break-word}
+.stage .word i{font-style:normal;color:var(--c);-webkit-text-stroke:1.5px var(--ink)}
+.row{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:14px;flex-wrap:wrap}
+.btn{background:var(--card);border:4px solid var(--c,var(--c6));border-radius:24px;padding:10px 22px;font-family:var(--font-display);font-weight:800;font-size:24px;min-height:60px;box-shadow:0 5px 0 var(--c,var(--c6));transition:transform .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--c,var(--c6))}
+.btn.round{width:64px;padding:0;font-size:30px}
+
+/* kotak pilihan huruf / suku kata */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:10px;margin-top:18px}
+.chip{background:var(--t);border:4px solid var(--c);border-radius:20px;min-height:64px;font-family:var(--font-read);font-weight:700;font-size:26px;box-shadow:0 4px 0 var(--c);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--c);color:#fff;transform:translateY(3px);box-shadow:0 1px 0 var(--c);text-shadow:0 2px 0 rgba(42,35,84,.35)}
+
+/* suku kata */
+.sylrow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}
+.syl{background:var(--t);border:5px solid var(--c);border-radius:28px;aspect-ratio:1/1.1;display:grid;place-items:center;font-family:var(--font-read);font-weight:700;font-size:clamp(34px,10vw,60px);box-shadow:0 6px 0 var(--c);min-width:0}
+.syl:active{transform:translateY(5px);box-shadow:0 1px 0 var(--c)}
+.cons{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.cons .chip{min-width:56px;min-height:56px;font-size:24px;flex:1 0 56px;max-width:80px}
+
+/* baca kata */
+.sylwrap{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.sylbtn{background:var(--card);border:4px solid var(--c);border-radius:20px;padding:2px 14px;font-family:var(--font-read);font-weight:700;font-size:clamp(38px,11vw,64px);line-height:1.25;box-shadow:0 4px 0 var(--c);color:var(--ink)}
+.sylbtn.lit{background:var(--c);color:#fff;text-shadow:0 2px 0 rgba(42,35,84,.4);transform:scale(1.1)}
+.counter{font-family:var(--font-display);font-weight:600;color:var(--ink-soft);font-size:20px}
+
+/* main */
+.modes{display:flex;gap:10px;margin-bottom:14px}
+.modes .btn{flex:1;font-size:20px;padding:8px 10px}
+.modes .btn[aria-pressed="true"]{background:var(--c6);color:#fff}
+.q{font-family:var(--font-display);font-weight:800;font-size:26px;margin:0 0 4px;text-wrap:balance}
+.choices{display:grid;grid-template-columns:1fr;gap:12px;margin-top:16px}
+.choice{background:var(--card);border:5px solid var(--c);border-radius:26px;min-height:76px;font-family:var(--font-read);font-weight:700;font-size:clamp(30px,9vw,46px);box-shadow:0 6px 0 var(--c);color:var(--ink)}
+.choice.ok{background:var(--c4);color:#fff;border-color:#1c8f5d;box-shadow:0 6px 0 #1c8f5d}
+.choice.no{background:#f1eef8;color:var(--ink-soft);border-color:#c7c1de;box-shadow:none;animation:shake .35s}
+.choice[disabled]{cursor:default}
+.letters3{grid-template-columns:repeat(3,1fr)}
+
+/* menu bawah */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:4px solid var(--ink);
+  padding:8px max(10px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+nav button{display:flex;flex-direction:column;align-items:center;gap:0;background:var(--t);border:4px solid var(--c);border-radius:20px;padding:4px 2px 2px;font-family:var(--font-display);font-weight:800;font-size:16px;line-height:1.1;min-height:68px;color:var(--ink)}
+nav button b{font-size:30px;line-height:1.1}
+nav button[aria-current="page"]{background:var(--c);color:#fff}
+nav button[aria-current="page"] b{filter:drop-shadow(0 2px 0 rgba(42,35,84,.4))}
+
+.note{margin:18px 0 0;font-size:14px;color:var(--ink-soft);text-align:center}
+
+/* efek */
+.pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.7) rotate(-8deg)}60%{transform:scale(1.18) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.burst{position:fixed;font-size:34px;pointer-events:none;z-index:50;animation:rise 1.3s ease-out forwards}
+@keyframes rise{0%{opacity:1;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(var(--dx),-240px) scale(1.4) rotate(var(--r))}}
+@media (prefers-reduced-motion:reduce){.pop,.choice.no,.burst{animation:none}.burst{display:none}.btn,.sylbtn{transition:none}}
+@media (min-width:560px){.choices{grid-template-columns:repeat(3,1fr)}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1><span>Baca</span> <span>Bareng</span> <span>Hewan</span></h1>
+    <div class="stars" title="Bintang kamu"><b>⭐</b><span id="starCount">0</span></div>
+  </header>
+
+  <!-- HURUF -->
+  <section id="huruf" class="on" aria-label="Kenali huruf">
+    <p class="hint">Ketuk hewan atau tombol suara untuk mendengar.</p>
+    <div class="stage" id="hStage">
+      <div class="emoji" id="hEmoji" role="button" tabindex="0" aria-label="Dengarkan"></div>
+      <div class="big" id="hBig"></div>
+      <div class="word" id="hWord"></div>
+      <div class="row">
+        <button class="btn round" id="hPrev" aria-label="Sebelumnya">◀</button>
+        <button class="btn" id="hSay">🔊 Dengar</button>
+        <button class="btn round" id="hNext" aria-label="Berikutnya">▶</button>
+      </div>
+    </div>
+    <div class="grid" id="hGrid"></div>
+  </section>
+
+  <!-- SUKU KATA -->
+  <section id="suku" aria-label="Suku kata">
+    <p class="hint">Pilih huruf, lalu ketuk suku katanya.</p>
+    <div class="cons" id="cons"></div>
+    <div class="sylrow" id="sylrow"></div>
+  </section>
+
+  <!-- BACA KATA -->
+  <section id="kata" aria-label="Baca kata">
+    <p class="hint">Ketuk tiap suku kata, atau tekan Baca untuk mendengar seluruh kata.</p>
+    <div class="stage" id="kStage">
+      <div class="emoji" id="kEmoji" role="button" tabindex="0" aria-label="Dengarkan"></div>
+      <div class="sylwrap" id="kSyl"></div>
+      <div class="word" id="kWord"></div>
+      <div class="row">
+        <button class="btn round" id="kPrev" aria-label="Sebelumnya">◀</button>
+        <button class="btn" id="kSay">🔊 Baca</button>
+        <button class="btn round" id="kNext" aria-label="Berikutnya">▶</button>
+      </div>
+      <div class="counter" id="kCount" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- MAIN -->
+  <section id="main" aria-label="Main tebak">
+    <div class="modes">
+      <button class="btn" id="mKata" aria-pressed="true" style="--c:var(--c6)">Tebak Kata</button>
+      <button class="btn" id="mHuruf" aria-pressed="false" style="--c:var(--c6)">Tebak Huruf</button>
+    </div>
+    <div class="stage" id="gStage">
+      <p class="q" id="gQ"></p>
+      <div class="emoji" id="gEmoji" role="button" tabindex="0" aria-label="Dengarkan pertanyaan"></div>
+      <div class="choices" id="gChoices"></div>
+    </div>
+  </section>
+
+  <p class="note" id="voiceNote" hidden>Suara bahasa Indonesia belum ada di perangkat ini, jadi suaranya mungkin terdengar berbeda. Cek pengaturan suara perangkat.</p>
+</div>
+
+<nav aria-label="Menu">
+  <button data-tab="huruf" style="--t:var(--t1);--c:var(--c1)"><b>🔤</b>Huruf</button>
+  <button data-tab="suku" style="--t:var(--t2);--c:var(--c2)"><b>🧩</b>Suku Kata</button>
+  <button data-tab="kata" style="--t:var(--t4);--c:var(--c4)"><b>📖</b>Kata</button>
+  <button data-tab="main" style="--t:var(--t7);--c:var(--c7)"><b>🎮</b>Main</button>
+</nav>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+  const PAL=[1,2,3,4,5,6,7,8];
+  const pal=i=>{const k=PAL[((i%8)+8)%8];return `--t:var(--t${k});--c:var(--c${k})`};
+  const setPal=(el,i)=>{const k=PAL[((i%8)+8)%8];el.style.setProperty('--t',`var(--t${k})`);el.style.setProperty('--c',`var(--c${k})`)};
+
+  /* ---------- data ---------- */
+  const L=[['A','Ayam','🐔'],['B','Bebek','🦆'],['C','Cicak','🦎'],['D','Domba','🐑'],['E','Elang','🦅'],['F','Flamingo','🦩'],
+  ['G','Gajah','🐘'],['H','Harimau','🐅'],['I','Ikan','🐟'],['J','Jerapah','🦒'],['K','Kuda','🐴'],['L','Lebah','🐝'],
+  ['M','Monyet','🐵'],['N','Nyamuk','🦟'],['O','Orangutan','🦧'],['P','Penguin','🐧'],['Q','Quail','🐤'],['R','Rusa','🦌'],
+  ['S','Singa','🦁'],['T','Tikus','🐭'],['U','Udang','🦐'],['V','Viper','🐍'],['W','Walet','🐦'],['X','Xerus','🐿️'],
+  ['Y','Yuyu','🦀'],['Z','Zebra','🦓']];
+  const W=[['a-yam','🐔'],['be-bek','🦆'],['ku-da','🐴'],['sa-pi','🐄'],['i-kan','🐟'],['u-lar','🐍'],['ga-jah','🐘'],['le-bah','🐝'],
+  ['ti-kus','🐭'],['ka-tak','🐸'],['se-mut','🐜'],['ku-cing','🐱'],['an-jing','🐶'],['ma-can','🐯'],['ze-bra','🦓'],['dom-ba','🐑'],
+  ['kam-bing','🐐'],['mo-nyet','🐵'],['si-nga','🦁'],['ker-bau','🐃'],['bu-rung','🐦'],['ke-pi-ting','🦀'],['ke-lin-ci','🐰'],
+  ['pen-guin','🐧'],['je-ra-pah','🦒'],['ku-pu-ku-pu','🦋'],['ku-ra-ku-ra','🐢'],['ke-le-la-war','🦇']].map(([s,e])=>({syl:s.split('-'),word:s.replace(/-/g,''),emoji:e}));
+  W.find(w=>w.word==='singa').syl=['sing','a'];
+  const CONS='B C D F G H J K L M N P R S T W Y Z'.split(' ');
+  const VOW=['a','i','u','e','o'];
+
+  /* ---------- suara ---------- */
+  let voice=null, hasVoice=('speechSynthesis' in window);
+  function pickVoice(){ if(!hasVoice) return; const v=speechSynthesis.getVoices(); voice=v.find(x=>/^id/i.test(x.lang))||null;
+    $('#voiceNote').hidden = !(v.length && !voice); }
+  if(hasVoice){ pickVoice(); try{speechSynthesis.addEventListener('voiceschanged',pickVoice)}catch(e){} }
+  function say(list){
+    if(!hasVoice) return;
+    try{
+      speechSynthesis.cancel();
+      [].concat(list).forEach(t=>{const u=new SpeechSynthesisUtterance(String(t));u.lang='id-ID';if(voice)u.voice=voice;u.rate=.72;u.pitch=1.15;speechSynthesis.speak(u)});
+    }catch(e){}
+  }
+
+  /* ---------- bintang & efek ---------- */
+  let stars=0;
+  try{stars=parseInt(localStorage.getItem('bbh-stars')||'0',10)||0}catch(e){}
+  const showStars=()=>{$('#starCount').textContent=stars};
+  const addStar=()=>{stars++;showStars();try{localStorage.setItem('bbh-stars',String(stars))}catch(e){}};
+  showStars();
+  const BURST=['⭐','🌈','🎈','🦋','🌟','🎉'];
+  function burst(from){
+    const r=(from||$('#gStage')).getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+    for(let i=0;i<10;i++){const s=document.createElement('span');s.className='burst';s.textContent=BURST[i%BURST.length];
+      s.style.left=(cx-17)+'px';s.style.top=(cy-17)+'px';s.style.setProperty('--dx',((Math.random()-.5)*320)+'px');s.style.setProperty('--r',((Math.random()-.5)*90)+'deg');
+      document.body.appendChild(s);setTimeout(()=>s.remove(),1400)}
+  }
+  const bounce=el=>{el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')};
+  const act=(el,fn)=>{el.addEventListener('click',fn);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}})};
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+  /* ---------- HURUF ---------- */
+  let hi=0;
+  function showLetter(i,speak){
+    hi=(i+L.length)%L.length; const [l,w,e]=L[hi], st=$('#hStage'); setPal(st,hi);
+    $('#hEmoji').textContent=e; $('#hBig').textContent=l+' '+l.toLowerCase();
+    $('#hWord').innerHTML=`<i>${w[0]}</i>${w.slice(1).toLowerCase()}`;
+    $$('#hGrid .chip').forEach((c,k)=>c.setAttribute('aria-pressed',String(k===hi)));
+    bounce($('#hEmoji')); if(speak) sayLetter();
+  }
+  const sayLetter=()=>{const [l,w]=L[hi];say([l,w])};
+  L.forEach(([l],i)=>{const b=document.createElement('button');b.className='chip';b.textContent=l;b.setAttribute('aria-pressed','false');b.setAttribute('aria-label','Huruf '+l);b.style.cssText=pal(i);
+    b.onclick=()=>showLetter(i,true);$('#hGrid').appendChild(b)});
+  $('#hPrev').onclick=()=>showLetter(hi-1,true); $('#hNext').onclick=()=>showLetter(hi+1,true);
+  $('#hSay').onclick=sayLetter; act($('#hEmoji'),()=>{bounce($('#hEmoji'));sayLetter()});
+
+  /* ---------- SUKU KATA ---------- */
+  let ci=0;
+  function showCons(i){
+    ci=i; const c=CONS[i].toLowerCase(); $$('#cons .chip').forEach((b,k)=>b.setAttribute('aria-pressed',String(k===i)));
+    const row=$('#sylrow'); row.innerHTML='';
+    VOW.forEach((v,k)=>{const b=document.createElement('button');b.className='syl';b.textContent=c+v;b.style.cssText=pal(k*2+i);
+      b.onclick=()=>{bounce(b);say(c+v)};row.appendChild(b)});
+  }
+  CONS.forEach((c,i)=>{const b=document.createElement('button');b.className='chip';b.textContent=c.toLowerCase();b.setAttribute('aria-pressed','false');b.setAttribute('aria-label','Huruf '+c);b.style.cssText=pal(i);
+    b.onclick=()=>{showCons(i);say(c)};$('#cons').appendChild(b)});
+  showCons(0);
+
+  /* ---------- BACA KATA ---------- */
+  let wi=0, timers=[];
+  function showWord(i,speak){
+    wi=(i+W.length)%W.length; const w=W[wi]; setPal($('#kStage'),wi);
+    $('#kEmoji').textContent=w.emoji; $('#kWord').textContent=w.word;
+    $('#kCount').textContent=`${wi+1} dari ${W.length}`;
+    const box=$('#kSyl'); box.innerHTML='';
+    w.syl.forEach((s,k)=>{const b=document.createElement('button');b.className='sylbtn';b.textContent=s;b.dataset.k=k;
+      b.onclick=()=>{lit(k);say(s)};box.appendChild(b)});
+    bounce($('#kEmoji')); if(speak) readWord();
+  }
+  function lit(k){$$('#kSyl .sylbtn').forEach((b,j)=>b.classList.toggle('lit',j===k))}
+  function readWord(){
+    const w=W[wi]; timers.forEach(clearTimeout); timers=[];
+    say([...w.syl,w.word]);
+    w.syl.forEach((_,k)=>timers.push(setTimeout(()=>lit(k),k*850)));
+    timers.push(setTimeout(()=>lit(-1),w.syl.length*850+500));
+  }
+  $('#kPrev').onclick=()=>showWord(wi-1,true); $('#kNext').onclick=()=>showWord(wi+1,true);
+  $('#kSay').onclick=readWord; act($('#kEmoji'),()=>{bounce($('#kEmoji'));say(W[wi].word)});
+  showWord(0,false);
+
+  /* ---------- MAIN ---------- */
+  let mode='kata', locked=false, target=null;
+  function newQuestion(){
+    locked=false; const ch=$('#gChoices'); ch.innerHTML=''; setPal($('#gStage'),Math.floor(Math.random()*8));
+    if(mode==='kata'){
+      target=W[Math.floor(Math.random()*W.length)];
+      const opts=shuffle([target,...shuffle(W.filter(w=>w.word!==target.word)).slice(0,2)]);
+      $('#gQ').textContent='Hewan apa ini?'; $('#gEmoji').textContent=target.emoji; ch.className='choices';
+      opts.forEach(o=>mk(o.word,o.word===target.word));
+    }else{
+      target=L[Math.floor(Math.random()*L.length)];
+      const opts=shuffle([target,...shuffle(L.filter(l=>l[0]!==target[0])).slice(0,2)]);
+      $('#gQ').textContent='Huruf depannya apa?'; $('#gEmoji').textContent=target[2]; ch.className='choices letters3';
+      opts.forEach(o=>mk(o[0]+' '+o[0].toLowerCase(),o[0]===target[0]));
+    }
+    bounce($('#gEmoji'));
+  }
+  function mk(label,right){
+    const b=document.createElement('button');b.className='choice';b.textContent=label;
+    b.onclick=()=>{
+      if(locked||b.disabled) return;
+      if(right){locked=true;b.classList.add('ok');addStar();burst($('#gStage'));
+        say(['Hebat!', mode==='kata'?target.word:target[1]]);setTimeout(newQuestion,2000)}
+      else{b.classList.add('no');b.disabled=true;say('Coba lagi')}
+    };
+    $('#gChoices').appendChild(b);
+  }
+  const askAgain=()=>{bounce($('#gEmoji'));say(mode==='kata'?'Hewan apa ini?':'Huruf depannya apa?')};
+  act($('#gEmoji'),askAgain);
+  function setMode(m){mode=m;$('#mKata').setAttribute('aria-pressed',String(m==='kata'));$('#mHuruf').setAttribute('aria-pressed',String(m==='huruf'));newQuestion()}
+  $('#mKata').onclick=()=>setMode('kata'); $('#mHuruf').onclick=()=>setMode('huruf');
+
+  /* ---------- menu ---------- */
+  const TABS=['huruf','suku','kata','main'];
+  function go(t,push){
+    if(!TABS.includes(t)) t='huruf';
+    TABS.forEach(id=>$('#'+id).classList.toggle('on',id===t));
+    $$('nav button').forEach(b=>{if(b.dataset.tab===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+    if(t==='main') newQuestion();
+    try{speechSynthesis.cancel()}catch(e){}
+    if(push){try{history.replaceState(null,'','#'+t)}catch(e){}}
+    window.scrollTo(0,0);
+  }
+  $$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.tab,true));
+  showLetter(0,false);
+  go((location.hash||'').slice(1),false);
+})();
+</script>
+
+</body>
+</html>

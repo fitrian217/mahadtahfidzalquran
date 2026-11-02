@@ -1,0 +1,13 @@
+(function(){const b=document.getElementById('waFab');if(!b)return;const K='waPos';let sx=0,sy=0,ox=0,oy=0,mv=false,on=false;
+const lim=(x,y)=>{const r=b.getBoundingClientRect();return[Math.max(4,Math.min(innerWidth-r.width-4,x)),Math.max(4,Math.min(innerHeight-r.height-4,y))]};
+const put=(x,y)=>{const p=lim(x,y);b.style.left=p[0]+'px';b.style.top=p[1]+'px';b.style.right='auto';b.style.bottom='auto'};
+const keep=()=>{try{const r=b.getBoundingClientRect();localStorage.setItem(K,JSON.stringify({x:r.left/Math.max(1,innerWidth-r.width),y:r.top/Math.max(1,innerHeight-r.height)}))}catch(e){}};
+const load=()=>{try{const p=JSON.parse(localStorage.getItem(K)||'null');if(p&&isFinite(p.x)&&isFinite(p.y)){const r=b.getBoundingClientRect();put(p.x*(innerWidth-r.width),p.y*(innerHeight-r.height))}}catch(e){}};
+b.addEventListener('pointerdown',e=>{if(e.button>0)return;const r=b.getBoundingClientRect();on=true;mv=false;sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;try{b.setPointerCapture(e.pointerId)}catch(x){}});
+b.addEventListener('pointermove',e=>{if(!on)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(!mv&&Math.hypot(dx,dy)<6)return;mv=true;b.classList.add('dg');put(ox+dx,oy+dy)});
+const end=()=>{if(!on)return;on=false;b.classList.remove('dg');if(mv)keep()};
+b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
+b.addEventListener('click',e=>{if(mv){e.preventDefault();mv=false}});
+b.addEventListener('dragstart',e=>e.preventDefault());
+addEventListener('resize',()=>{if(b.style.top)put(parseFloat(b.style.left)||0,parseFloat(b.style.top)||0)});
+load()})();
